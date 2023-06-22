@@ -50,7 +50,7 @@ class ConfigParser:
     @classmethod
     def from_args(cls, args, options=''):
         """
-        Initialize this class from some cli arguments. Used in train, test.
+        Initialize this class from some cli(command line) arguments. Used in train, test.
         """
         for opt in options:
             args.add_argument(*opt.flags, default=None, type=opt.type)

@@ -10,6 +10,8 @@ from parse_config import ConfigParser
 from trainer import Trainer
 from utils import prepare_device
 
+# for debug
+import sys
 
 # fix random seeds for reproducibility
 SEED = 123
@@ -20,25 +22,30 @@ np.random.seed(SEED)
 
 def main(config):
     logger = config.get_logger('train')
-
+    
     # setup data_loader instances
     data_loader = config.init_obj('data_loader', module_data)
     valid_data_loader = data_loader.split_validation()
-
+    
     # build model architecture, then print to console
     model = config.init_obj('arch', module_arch)
     logger.info(model)
-
+    
     # prepare for (multi-device) GPU training
     device, device_ids = prepare_device(config['n_gpu'])
     model = model.to(device)
+    
+    # device가 1개 초과이면 parallel 진행
     if len(device_ids) > 1:
         model = torch.nn.DataParallel(model, device_ids=device_ids)
 
     # get function handles of loss and metrics
+    # 사용하는 loss 이름
     criterion = getattr(module_loss, config['loss'])
+    
+    # 사용하는 평가 metric 목록
     metrics = [getattr(module_metric, met) for met in config['metrics']]
-
+        
     # build optimizer, learning rate scheduler. delete every lines containing lr_scheduler for disabling scheduler
     trainable_params = filter(lambda p: p.requires_grad, model.parameters())
     optimizer = config.init_obj('optimizer', torch.optim, trainable_params)
@@ -64,6 +71,7 @@ if __name__ == '__main__':
                       help='indices of GPUs to enable (default: all)')
 
     # custom cli options to modify configuration from default values given in json file.
+    # json 파일에 있는 parameter 중 바꾸고 싶은 옵션을 넣기
     CustomArgs = collections.namedtuple('CustomArgs', 'flags type target')
     options = [
         CustomArgs(['--lr', '--learning_rate'], type=float, target='optimizer;args;lr'),

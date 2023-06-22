@@ -58,6 +58,7 @@ class BaseTrainer:
         """
         Full training logic
         """
+        # Early-stopping을 위함인듯?
         not_improved_count = 0
         for epoch in range(self.start_epoch, self.epochs + 1):
             result = self._train_epoch(epoch)

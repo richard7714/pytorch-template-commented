@@ -1,6 +1,7 @@
 import importlib
 from datetime import datetime
 
+import sys
 
 class TensorboardWriter():
     def __init__(self, log_dir, logger, enabled):
@@ -44,6 +45,8 @@ class TensorboardWriter():
             self.timer = datetime.now()
         else:
             duration = datetime.now() - self.timer
+            
+            # 초당 실행가능한 step
             self.add_scalar('steps_per_sec', 1 / duration.total_seconds())
             self.timer = datetime.now()
 
