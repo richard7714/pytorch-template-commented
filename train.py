@@ -71,7 +71,7 @@ if __name__ == '__main__':
                       help='indices of GPUs to enable (default: all)')
 
     # custom cli options to modify configuration from default values given in json file.
-    # json 파일에 있는 parameter 중 바꾸고 싶은 옵션을 넣기
+    # json 파일에 있는 parameter 중 바꾸고 싶은 옵션을 cli 형태로 추가 가능
     CustomArgs = collections.namedtuple('CustomArgs', 'flags type target')
     options = [
         CustomArgs(['--lr', '--learning_rate'], type=float, target='optimizer;args;lr'),

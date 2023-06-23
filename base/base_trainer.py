@@ -2,7 +2,7 @@ import torch
 from abc import abstractmethod
 from numpy import inf
 from logger import TensorboardWriter
-
+import sys
 
 class BaseTrainer:
     """
@@ -62,20 +62,24 @@ class BaseTrainer:
         not_improved_count = 0
         for epoch in range(self.start_epoch, self.epochs + 1):
             result = self._train_epoch(epoch)
-
-            # save logged informations into log dict
+            
+            # log된 정보들을 log dict에 저장
             log = {'epoch': epoch}
+            
+            # result를 log dictionary에 추가 (append)
             log.update(result)
-
-            # print logged informations to the screen
+                        
+            # log 기록한 정보들을 출력
             for key, value in log.items():
                 self.logger.info('    {:15s}: {}'.format(str(key), value))
 
-            # evaluate model performance according to configured metric, save best checkpoint as model_best
+            # 설정한 metric에 따라 모델의 성능 평가 후 가장 성능이 좋은 모델을 model_best로 기록
             best = False
+            
+            # monitor 모드 체크
             if self.mnt_mode != 'off':
                 try:
-                    # check whether model performance improved or not, according to specified metric(mnt_metric)
+                    # 평가 지표(mnt_metric)에 따라 모델의 성능이 향상되었는지 체크
                     improved = (self.mnt_mode == 'min' and log[self.mnt_metric] <= self.mnt_best) or \
                                (self.mnt_mode == 'max' and log[self.mnt_metric] >= self.mnt_best)
                 except KeyError:
@@ -91,6 +95,7 @@ class BaseTrainer:
                 else:
                     not_improved_count += 1
 
+                # 일정 이상 성능 향상이 이루어지지 않을 경우 early stopping
                 if not_improved_count > self.early_stop:
                     self.logger.info("Validation performance didn\'t improve for {} epochs. "
                                      "Training stops.".format(self.early_stop))
